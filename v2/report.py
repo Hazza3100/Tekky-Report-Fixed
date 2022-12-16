@@ -126,7 +126,7 @@ if __name__ == "__main__":
             try:
                 response = requests.get(url, headers=headers).json()
             except:
-                break
+                pass
 
             try:
                 if response["status_msg"] == "No more videos":
