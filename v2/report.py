@@ -1,21 +1,23 @@
-from requests import request
+from colorama import Fore
 from pystyle import Colorate, Colors, Center
 from os import system
 from threading import Thread
-from json import loads
-from re import findall
+
+import requests
 
 report_video = 0
 report_user = 0
 
 
-def user_info(username: str) -> dict:
-    html_data = request(
-        "GET", f"https://livecounts.io/tiktok-live-follower-counter/{username}"
-    ).text
-    parsed_info = loads(findall(r'n">(.*)<\/s', html_data)[0])
+def get_id(username):
+    try:
+        headers = {'authority': 'www.tiktok.com','accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9','accept-language': 'en-US,en;q=0.9','cookie': 'msToken=cxfL0lxGWTg_UmhgLz8U_Nv3ecxsgvBu5OJ1FtmVgMd3cHWoFCxQnyHSUzoCzEMMh0XeZzSw_gjF8XhG8Qp9qiE7yi9Yjm5B64hK4qdEMnhOvQCK6bL2bP8h6pAAVdphB3w_yBje2nj3iFw=','sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"','sec-ch-ua-mobile': '?0','sec-ch-ua-platform': '"Windows"','sec-fetch-dest': 'document','sec-fetch-mode': 'navigate','sec-fetch-site': 'none','sec-fetch-user': '?1','upgrade-insecure-requests': '1','user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',}
 
-    return parsed_info["props"]["pageProps"]["data"]
+        response = requests.get(f'https://www.tiktok.com/@{username}', headers=headers)
+        return response.text.split('authorId":"')[1].split('","')[0]
+    except:
+        print(f"{Fore.BLUE}[ {Fore.RED}x {Fore.BLUE}]{Fore.RESET} Username Invalid")
+
 
 
 def status(report_video, report_user):
@@ -46,7 +48,7 @@ def report(id, aweme_id, sessionid):
 
     while True:
         try:
-            request("GET", url, headers=headers)
+            requests.get(url, headers=headers)
 
             report_video += 1
 
@@ -83,7 +85,7 @@ if __name__ == "__main__":
     banner()
 
     username = input(Colorate.Horizontal(Colors.blue_to_cyan, "[?] Username >>> "))
-    id = user_info(username)["userId"]
+    id = get_id(username)
 
     banner()
 
@@ -100,7 +102,7 @@ if __name__ == "__main__":
         "user-agent": "com.ss.android.ugc.trill/240303 (Linux; U; Android 12; en_US; Pixel 6 Pro; Build/SP2A.220405.004;tt-ok/3.10.0.2)",
     }
 
-    request("GET", url, headers=headers)
+    requests.get(url, headers=headers)
 
     report_user += 1
 
@@ -121,8 +123,10 @@ if __name__ == "__main__":
                 "sdk-version": "1",
                 "User-Agent": "com.zhiliaoapp.musically/2019021215 (Linux; U; Android 12; en_US; Pixel 6 Pro; Build/SP2A.220405.004; Cronet/58.0.2991.0)",
             }
-
-            response = request("GET", url, headers=headers).json()
+            try:
+                response = requests.get(url, headers=headers).json()
+            except:
+                break
 
             try:
                 if response["status_msg"] == "No more videos":
